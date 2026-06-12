@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>FM Mock Life Safety Survey | Plant Operations</title>
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES + RESET
+   ============================================================ */
+:root {
+  --navy:       #1B3A6B;
+  --navy-dark:  #122850;
+  --navy-light: #2A5298;
+  --gold:       #C9A84C;
+  --gold-light: #F0E2B0;
+  --gold-pale:  #FAF6E8;
+  --white:      #FFFFFF;
+  --gray-100:   #F1F3F5;
+  --gray-200:   #E9ECEF;
+  --gray-300:   #DEE2E6;
+  --gray-400:   #CED4DA;
+  --gray-500:   #ADB5BD;
+  --gray-700:   #495057;
+  --gray-800:   #343A40;
+  --gray-900:   #212529;
+  --pass:       #1E7E34;
+  --pass-bg:    #D4EDDA;
+  --fail:       #B21F2D;
+  --fail-bg:    #F8D7DA;
+  --na-bg:      #F1F3F5;
+  --immed:      #8B0000;
+  --immed-bg:   #FFE0E0;
+  --day30:      #7B4F00;
+  --day30-bg:   #FFF3CD;
+  --day90:      #1B3A6B;
+  --day90-bg:   #D6E4FF;
+  --etag:       #4A235A;
+  --etag-bg:    #F3EAF8;
+  --etag-border:#9B59B6;
+  --radius:     6px;
+  --shadow:     0 2px 8px rgba(0,0,0,0.10);
+  --font:       -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--gray-100);
+  color: var(--gray-900);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   SCREEN UTILITY
+   ============================================================ */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ============================================================
+   GLOBAL HEADER (no cross symbol per v1.1)
+   ============================================================ */
+#app-header {
+  background: var(--navy);
+  color: var(--white);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  gap: 12px;
+}
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+.header-org {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--gold);
+  line-height: 1.2;
+}
+.header-dept {
+  font-size: 1.0rem;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.2;
+}
+.header-badge {
+  font-size: 0.72rem;
+  background: var(--gold);
+  color: var(--navy-dark);
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   SETUP SCREEN
+   ============================================================ */
+#setup-screen {
+  max-width: 620px;
+  margin: 32px auto;
+  padding: 0 16px 60px;
+}
+.setup-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  border-top: 4px solid var(--gold);
+}
+.setup-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.setup-subtitle {
+  font-size: 0.87rem;
+  color: var(--gray-700);
+  margin-bottom: 26px;
+}
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block;
+  font-size: 0.80rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--navy);
+  margin-bottom: 7px;
+}
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 1rem;
+  color: var(--gray-900);
+  background: var(--white);
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--navy-light);
+  box-shadow: 0 0 0 3px rgba(27,58,107,0.12);
+}
+.select-wrapper { position: relative; }
+.select-wrapper::after {
+  content: '\25BC';
+  font-size: 0.68rem;
+  color: var(--gray-500);
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Care level buttons */
+.care-level-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.care-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 6px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  background: var(--white);
+  transition: all 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  min-height: 48px;
+}
+.care-btn.selected {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
+}
+.care-btn.disabled {
+  opacity: 0.38;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Intensity selector */
+.intensity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.intensity-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 6px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  background: var(--white);
+  color: var(--gray-700);
+  transition: all 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  min-height: 56px;
+  gap: 3px;
+}
+.intensity-btn.selected {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
+}
+.intensity-label {
+  font-size: 0.90rem;
+  font-weight: 700;
+}
+.intensity-count {
+  font-size: 0.70rem;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.btn-generate {
+  width: 100%;
+  padding: 15px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 1.0rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  letter-spacing: 0.03em;
+  margin-top: 6px;
+  min-height: 52px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-generate:hover,
+.btn-generate:active { background: var(--navy-light); }
+.setup-note {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* ============================================================
+   SURVEY SCREEN
+   ============================================================ */
+#survey-screen {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 18px 16px 60px;
+}
+.survey-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.survey-meta {
+  font-size: 0.82rem;
+  color: var(--gray-700);
+  line-height: 1.7;
+}
+.survey-meta strong { color: var(--navy); }
+.intensity-pip {
+  display: inline-block;
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--gold-light);
+  color: var(--navy-dark);
+  margin-left: 4px;
+}
+.survey-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.btn-sm {
+  padding: 9px 14px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  min-height: 40px;
+  touch-action: manipulation;
+}
+.btn-outline {
+  background: var(--white);
+  border: 1.5px solid var(--navy);
+  color: var(--navy);
+}
+.btn-outline:hover,
+.btn-outline:active { background: var(--navy); color: var(--white); }
+.btn-gold { background: var(--gold); color: var(--navy-dark); }
+.btn-gold:hover,
+.btn-gold:active { background: #b8932a; }
+.btn-navy { background: var(--navy); color: var(--white); }
+.btn-navy:hover,
+.btn-navy:active { background: var(--navy-light); }
+
+/* Progress bar */
+.progress-bar-wrapper {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 13px 18px;
+  margin-bottom: 16px;
+}
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 7px;
+}
+.progress-label {
+  font-size: 0.80rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--navy);
+}
+.progress-count { font-size: 0.80rem; color: var(--gray-700); }
+.progress-track {
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.progress-stats {
+  display: flex;
+  gap: 14px;
+  margin-top: 9px;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+}
+.stat-pass { color: var(--pass); font-weight: 700; }
+.stat-fail { color: var(--fail); font-weight: 700; }
+.stat-na   { color: var(--gray-500); font-weight: 600; }
+
+/* Section tabs */
+.section-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.section-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 9px 13px;
+  border: 1.5px solid var(--gray-300);
+  background: var(--white);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--gray-700);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  touch-action: manipulation;
+  min-height: 40px;
+}
+.tab-btn.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+.tab-btn:hover:not(.active) { border-color: var(--navy); color: var(--navy); }
+.tab-btn.etag-tab { border-color: var(--etag-border); color: var(--etag); }
+.tab-btn.etag-tab.active { background: var(--etag); border-color: var(--etag); color: var(--white); }
+.tab-btn.etag-tab:hover:not(.active) { border-color: var(--etag); }
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0 4px;
+}
+.tab-badge.fail-badge { background: var(--fail); color: var(--white); }
+.tab-badge.default-badge { background: var(--gray-200); color: var(--gray-700); }
+.tab-btn.active .tab-badge.default-badge { background: rgba(255,255,255,0.25); color: var(--white); }
+
+/* Item cards */
+.section-panel { display: none; }
+.section-panel.active { display: block; }
+.section-heading {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--gold);
+  padding: 6px 0 9px;
+  border-bottom: 2px solid var(--gold-light);
+  margin-bottom: 12px;
+}
+.section-heading.etag-heading {
+  color: var(--etag);
+  border-bottom-color: var(--etag-bg);
+}
+.item-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 18px;
+  margin-bottom: 11px;
+  border-left: 4px solid var(--gray-300);
+  transition: border-color 0.15s;
+}
+.item-card.status-pass { border-left-color: var(--pass); }
+.item-card.status-fail { border-left-color: var(--fail); background: #FFFAFA; }
+.item-card.status-na { border-left-color: var(--gray-300); }
+.item-card.etag-card { border-left-color: var(--etag-border); }
+.item-card.etag-card.status-pass { border-left-color: var(--pass); }
+.item-card.etag-card.status-fail { border-left-color: var(--fail); background: #FFFAFA; }
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+.tag-num {
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  color: var(--navy);
+  background: var(--gold-pale);
+  border: 1px solid var(--gold-light);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tag-num.etag-num {
+  color: var(--etag);
+  background: var(--etag-bg);
+  border-color: #d9b3f0;
+}
+.care-flag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--gray-300);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.item-prompt {
+  font-size: 0.89rem;
+  color: var(--gray-800);
+  line-height: 1.5;
+  margin-bottom: 11px;
+}
+.toggle-group {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+.toggle-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--gray-300);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  transition: all 0.15s;
+  text-align: center;
+  touch-action: manipulation;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-btn.sel-pass { background: var(--pass-bg); color: var(--pass); border-color: var(--pass); }
+.toggle-btn.sel-fail { background: var(--fail-bg); color: var(--fail); border-color: var(--fail); }
+.toggle-btn.sel-na   { background: var(--na-bg); color: var(--gray-700); border-color: var(--gray-400); }
+.fail-details { display: none; margin-top: 9px; }
+.fail-details.visible { display: block; }
+.priority-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--gray-700);
+  margin-bottom: 6px;
+}
+.priority-group { display: flex; gap: 6px; margin-bottom: 9px; flex-wrap: wrap; }
+.priority-btn {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--gray-300);
+  background: var(--white);
+  color: var(--gray-700);
+  transition: all 0.15s;
+  white-space: nowrap;
+  touch-action: manipulation;
+  min-height: 40px;
+}
+.priority-btn.sel-immed { background: var(--immed-bg); color: var(--immed); border-color: var(--immed); }
+.priority-btn.sel-30    { background: var(--day30-bg); color: var(--day30); border-color: #E6A817; }
+.priority-btn.sel-90    { background: var(--day90-bg); color: var(--day90); border-color: var(--navy-light); }
+.notes-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--gray-700);
+  margin-bottom: 5px;
+}
+.notes-field {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 0.87rem;
+  color: var(--gray-900);
+  resize: vertical;
+  min-height: 72px;
+  transition: border-color 0.15s;
+}
+.notes-field:focus {
+  outline: none;
+  border-color: var(--navy-light);
+  box-shadow: 0 0 0 3px rgba(27,58,107,0.10);
+}
+
+/* ============================================================
+   PRINT CSS
+   ============================================================ */
+@media print {
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  body { background: white; font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #000; }
+  #app-header, #setup-screen, #survey-screen { display: none !important; }
+  #report-print { display: block !important; }
+
+  .print-page { page-break-after: always; padding: 0; margin: 0; }
+  .print-page:last-child { page-break-after: auto; }
+
+  .print-header {
+    border-bottom: 3px solid #1B3A6B;
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .print-org  { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #1B3A6B; }
+  .print-dept { font-size: 11pt; font-weight: 700; color: #1B3A6B; }
+  .print-page-num { font-size: 8pt; color: #666; text-align: right; }
+
+  .cover-body { margin-top: 60pt; text-align: center; }
+  .cover-title { font-size: 22pt; font-weight: 700; color: #1B3A6B; margin-bottom: 6pt; }
+  .cover-subtitle { font-size: 12pt; color: #555; margin-bottom: 40pt; }
+  .cover-meta-table { width: 380pt; margin: 0 auto; border-collapse: collapse; }
+  .cover-meta-table td { padding: 7pt 12pt; border-bottom: 1px solid #E0E0E0; font-size: 10pt; }
+  .cover-meta-table .meta-lbl { font-weight: 700; color: #1B3A6B; width: 42%; text-align: right; padding-right: 16pt; }
+  .cover-meta-table .meta-val { color: #222; }
+  .cover-disclaimer { margin-top: 50pt; font-size: 7.5pt; color: #888; max-width: 420pt; margin-left: auto; margin-right: auto; line-height: 1.6; }
+
+  .print-section-heading { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: #C9A84C; background: #1B3A6B; padding: 5pt 8pt; margin: 14pt 0 8pt; }
+  .print-section-heading.etag-heading { color: #E8CEFF; background: #4A235A; }
+
+  .print-item { border: 1px solid #CCC; padding: 8pt 10pt; margin-bottom: 8pt; page-break-inside: avoid; }
+  .print-item.item-pass { background: #F4FBF6; border-color: #B8DFC4; }
+  .print-item.item-fail { background: #FFF5F5; border-color: #E8B4B8; }
+  .print-item.item-na   { background: #FAFAFA; border-color: #DDD; }
+  .print-item-header { display: flex; justify-content: space-between; margin-bottom: 5pt; align-items: flex-start; }
+  .print-ktag { font-size: 8pt; font-weight: 800; letter-spacing: 0.08em; color: #1B3A6B; border: 1.5px solid #C9A84C; padding: 1pt 5pt; }
+  .print-ktag.etag { color: #4A235A; border-color: #9B59B6; }
+  .print-priority { font-size: 7.5pt; font-weight: 700; padding: 1pt 6pt; border: 1.5px solid; }
+  .print-priority.immed  { color: #8B0000; border-color: #8B0000; background: #FFF0F0; }
+  .print-priority.d30    { color: #7B4F00; border-color: #E6A817; background: #FFF8E0; }
+  .print-priority.d90    { color: #1B3A6B; border-color: #2A5298; background: #EAF0FF; }
+  .print-status { font-size: 7.5pt; font-weight: 700; padding: 1pt 6pt; border: 1.5px solid; }
+  .print-status.st-pass { color: #1E7E34; border-color: #1E7E34; background: #EBF8EE; }
+  .print-status.st-fail { color: #8B0000; border-color: #8B0000; background: #FFF0F0; }
+  .print-status.st-na   { color: #666;    border-color: #BBB;    background: #F5F5F5; }
+  .print-prompt { font-size: 9.5pt; color: #222; line-height: 1.5; margin-bottom: 5pt; }
+  .print-notes-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #555; margin-bottom: 2pt; }
+  .print-notes { font-size: 9pt; color: #333; border-left: 2.5px solid #C9A84C; padding-left: 7pt; font-style: italic; line-height: 1.5; }
+  .print-notes-empty { font-size: 8.5pt; color: #999; font-style: italic; }
+
+  .scorecard-title { font-size: 13pt; font-weight: 700; color: #1B3A6B; margin-bottom: 14pt; }
+  .scorecard-grid { display: flex; gap: 12pt; margin-bottom: 18pt; flex-wrap: wrap; }
+  .scorecard-box { border: 2px solid #1B3A6B; padding: 9pt 12pt; text-align: center; min-width: 64pt; }
+  .scorecard-num { font-size: 20pt; font-weight: 700; color: #1B3A6B; line-height: 1; }
+  .scorecard-lbl { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-top: 3pt; }
+  .scorecard-num.fail-num { color: #B21F2D; }
+  .section-scorecard { border-collapse: collapse; width: 100%; margin-bottom: 18pt; }
+  .section-scorecard th { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #1B3A6B; background: #F0E2B0; padding: 5pt 8pt; border: 1px solid #CCC; text-align: left; }
+  .section-scorecard td { font-size: 9pt; padding: 5pt 8pt; border: 1px solid #DDD; color: #333; }
+  .section-scorecard tr:nth-child(even) td { background: #F8F8F8; }
+  .fail-rate-high { color: #B21F2D; font-weight: 700; }
+
+  .sig-title { font-size: 13pt; font-weight: 700; color: #1B3A6B; margin-bottom: 16pt; }
+  .sig-block { margin-bottom: 24pt; }
+  .sig-line { border-bottom: 1.5px solid #333; height: 28pt; margin-bottom: 4pt; width: 320pt; }
+  .sig-sublabel { font-size: 8pt; color: #555; }
+
+  #report-print { display: block; padding: 24pt 36pt; }
+}
+
+#report-print { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     GLOBAL HEADER
+     ============================================================ -->
+<header id="app-header">
+  <div class="header-inner">
+    <div class="header-text">
+      <div class="header-org">Franciscan Ministries | Plant Operations</div>
+      <div class="header-dept">Mock Life Safety Survey</div>
+    </div>
+    <div class="header-badge">v1.2</div>
+  </div>
+</header>
+
+<!-- ============================================================
+     SETUP SCREEN
+     ============================================================ -->
+<div id="setup-screen" class="screen active">
+  <div class="setup-card">
+    <div class="setup-title">Survey Setup</div>
+    <div class="setup-subtitle">Configure this mock survey session before generating the item set.</div>
+
+    <div class="form-group">
+      <label class="form-label" for="sel-community">Community</label>
+      <div class="select-wrapper">
+        <select id="sel-community" class="form-select" onchange="onCommunityChange(this)">
+          <option value="">Select a community...</option>
+          <option value="AV">AV &mdash; Addolorata Villa</option>
+          <option value="FV">FV &mdash; Franciscan Village</option>
+          <option value="MAV">MAV &mdash; Mount Alverna Village</option>
+          <option value="MV">MV &mdash; Marian Village</option>
+          <option value="SJV">SJV &mdash; St. Joseph Village</option>
+          <option value="UP">UP &mdash; University Place</option>
+          <option value="VMC">VMC &mdash; Village at Mercy Creek</option>
+          <option value="VVL">VVL &mdash; Village at Victory Lakes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Care Levels Present</label>
+      <div class="care-level-grid">
+        <button type="button" class="care-btn" id="btn-IL"  data-level="IL"  onclick="toggleCareLevel(this)">IL</button>
+        <button type="button" class="care-btn" id="btn-AL"  data-level="AL"  onclick="toggleCareLevel(this)">AL</button>
+        <button type="button" class="care-btn" id="btn-MC"  data-level="MC"  onclick="toggleCareLevel(this)">MC</button>
+        <button type="button" class="care-btn" id="btn-SNF" data-level="SNF" onclick="toggleCareLevel(this)">SNF</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-surveyor">Surveyor</label>
+      <input type="text" id="inp-surveyor" class="form-input" placeholder="Enter surveyor name" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-date">Survey Date</label>
+      <input type="date" id="inp-date" class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Survey Intensity</label>
+      <div class="intensity-grid">
+        <button type="button" class="intensity-btn" id="int-spot" data-intensity="spot" onclick="selectIntensity(this)">
+          <span class="intensity-label">Spot Check</span>
+          <span class="intensity-count">24 items</span>
+        </button>
+        <button type="button" class="intensity-btn selected" id="int-standard" data-intensity="standard" onclick="selectIntensity(this)">
+          <span class="intensity-label">Standard</span>
+          <span class="intensity-count">45 items</span>
+        </button>
+        <button type="button" class="intensity-btn" id="int-intensive" data-intensity="intensive" onclick="selectIntensity(this)">
+          <span class="intensity-label">Intensive</span>
+          <span class="intensity-count">63 items</span>
+        </button>
+      </div>
+    </div>
+
+    <button type="button" class="btn-generate" id="btn-generate-survey" onclick="generateSurvey()">Generate Survey</button>
+    <div class="setup-note">Items are drawn from the K-tag and E-tag pools using weighted randomization by section.</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SURVEY SCREEN
+     ============================================================ -->
+<div id="survey-screen" class="screen">
+  <div class="survey-topbar">
+    <div class="survey-meta" id="survey-meta-block"></div>
+    <div class="survey-actions">
+      <button type="button" class="btn-sm btn-outline" id="btn-rerandomize"  onclick="rerandomize()">Re-randomize</button>
+      <button type="button" class="btn-sm btn-outline" id="btn-back-setup"   onclick="backToSetup()">Back to Setup</button>
+      <button type="button" class="btn-sm btn-gold"    id="btn-gen-report"   onclick="generateReport()">Generate Report</button>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrapper">
+    <div class="progress-header">
+      <span class="progress-label">Survey Progress</span>
+      <span class="progress-count" id="progress-count">0 items rated</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-stats">
+      <span class="stat-pass" id="stat-pass">Pass: 0</span>
+      <span class="stat-fail" id="stat-fail">Fail: 0</span>
+      <span class="stat-na"   id="stat-na">N/A: 0</span>
+    </div>
+  </div>
+
+  <div class="section-tabs" id="section-tabs"></div>
+  <div id="section-panels"></div>
+</div>
+
+<!-- ============================================================
+     PRINT REPORT (screen-hidden; window.print reveals via CSS)
+     ============================================================ -->
+<div id="report-print"></div>
+
+
+<script>
+/* ============================================================
+   K-TAG ITEM POOL
+   Format: { ktag, section, prompt, careLevels }
+   careLevels: ['All'] or subset of ['IL','AL','MC','SNF']
+   ============================================================ */
+const KTAG_POOL = [
+
+  /* ---- K200s: Building Construction ---- */
+  { ktag:'K211', section:'K200s', careLevels:['All'],
+    prompt:'Verify building construction type is documented and matches approved plans. Confirm the building meets construction type requirements for its occupancy and height per NFPA 101 Table 19.1.6.1.' },
+  { ktag:'K220', section:'K200s', careLevels:['All'],
+    prompt:'Inspect all required fire barriers and smoke barriers for penetrations, gaps, or unsealed openings. Confirm integrity is maintained above the ceiling line and through all utility chases.' },
+  { ktag:'K221', section:'K200s', careLevels:['All'],
+    prompt:'Verify that fire barrier walls achieve the required fire resistance rating. Confirm no duct, pipe, or conduit penetrations are unsealed. Check that ratings are not compromised by renovations.' },
+  { ktag:'K222', section:'K200s', careLevels:['All'],
+    prompt:'Confirm that all openings in fire barriers are protected with listed fire door assemblies of the appropriate rating. Verify door leaves are not blocked open by unapproved means.' },
+  { ktag:'K223', section:'K200s', careLevels:['All'],
+    prompt:'Inspect smoke barriers for full-height construction from floor to structure above. Confirm no unsealed openings and that 20-minute door assemblies are installed at all crossings.' },
+  { ktag:'K224', section:'K200s', careLevels:['SNF','AL','MC'],
+    prompt:'Verify that smoke compartment areas do not exceed 22,500 sq ft and that travel distance within a smoke compartment does not exceed 200 ft to a smoke barrier door.' },
+  { ktag:'K225', section:'K200s', careLevels:['SNF','MC'],
+    prompt:'Confirm horizontal exits are provided where required and that refuge area capacity on both sides meets the displaced-occupant formula per NFPA 101 7.2.4.' },
+  { ktag:'K231', section:'K200s', careLevels:['All'],
+    prompt:'Inspect all hazardous areas (soiled linen rooms, trash rooms, janitor closets, boiler rooms) to confirm they are separated from corridor by 1-hour fire barrier or protected with automatic sprinklers.' },
+  { ktag:'K232', section:'K200s', careLevels:['All'],
+    prompt:'Verify that gift shops, beauty salons, and other ancillary occupancies within the building are properly separated from the health care occupancy or meet open-plan requirements.' },
+  { ktag:'K233', section:'K200s', careLevels:['All'],
+    prompt:'Confirm that ambulatory care and business occupancy spaces within the building are separated by the required fire-resistance-rated construction per NFPA 101 occupancy separation rules.' },
+  { ktag:'K241', section:'K200s', careLevels:['All'],
+    prompt:'Inspect all door assemblies in required fire barriers. Verify door ratings are stenciled or labeled, leaves are not blocked open, hardware is functioning, and self-closing devices are operational.' },
+  { ktag:'K242', section:'K200s', careLevels:['All'],
+    prompt:'Verify window assemblies in fire barriers carry the correct fire-resistance rating and are not replaced with unrated glazing. Check for cracks or seal failures around frames.' },
+  { ktag:'K251', section:'K200s', careLevels:['All'],
+    prompt:'Inspect all through-penetrations of fire-rated assemblies for approved listed firestop systems with documentation on file. Confirm no open or unprotected penetrations exist.' },
+  { ktag:'K252', section:'K200s', careLevels:['All'],
+    prompt:'Verify that membrane penetrations of fire-rated walls and ceilings comply with listed firestop methods. Confirm recessed light fixtures in rated ceilings are listed for the purpose.' },
+  { ktag:'K261', section:'K200s', careLevels:['All'],
+    prompt:'Confirm that any spaces used for assembly occupancy (dining rooms, chapels, activity rooms) that exceed 50 occupants are properly separated or meet mixed occupancy provisions of NFPA 101.' },
+  { ktag:'K271', section:'K200s', careLevels:['All'],
+    prompt:'Verify that interior finish materials in corridors, exit enclosures, and lobbies are listed and comply with Class A or B flame-spread requirements. Check for unapproved combustible decorations in corridors.' },
+
+  /* ---- K300s: Protection ---- */
+  { ktag:'K311', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify that the building is protected throughout by an approved supervised automatic sprinkler system meeting NFPA 13 requirements. Confirm current inspection tag from a licensed contractor is present at each riser.' },
+  { ktag:'K312', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Inspect sprinkler heads throughout the facility for corrosion, paint overspray, missing escutcheon plates, or physical damage. Verify heads are not closer than 18 inches to any storage.' },
+  { ktag:'K313', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Confirm sprinkler system water supply and pressure are adequate. Verify that control valves are in the open position, electronically supervised, and accessible with signage posted.' },
+  { ktag:'K321', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify the fire alarm system is electrically supervised and connected to the local fire authority or a listed monitoring service. Confirm annual inspection documentation is on file and current.' },
+  { ktag:'K322', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Test a sample of manual pull stations for proper operation. Confirm pull stations are unobstructed, mounted at the correct height (42 to 48 inches), and clearly visible.' },
+  { ktag:'K323', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify smoke detection devices in the HVAC system are connected to the fire alarm and will shut down air handling units upon activation. Confirm duct detectors are accessible for testing.' },
+  { ktag:'K324', section:'K300s-Protection', careLevels:['SNF','AL','MC'],
+    prompt:'Inspect corridor smoke detection coverage in non-sprinklered smoke compartments. Confirm spacing does not exceed 30-foot spacing or manufacturer requirements for the detector model installed.' },
+  { ktag:'K325', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify that the facility has and follows a documented fire watch procedure for any period when the fire alarm or sprinkler system is out of service for more than 4 hours.' },
+  { ktag:'K331', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Confirm portable fire extinguishers are mounted, clearly visible, accessible, inspected monthly by staff, and receive annual maintenance by a licensed contractor. Verify Class K extinguishers are present in the kitchen.' },
+  { ktag:'K341', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Inspect the commercial kitchen hood suppression system for current inspection tag (semi-annual), proper fusible link replacement, and that the system is connected to automatically shut off cooking equipment.' },
+  { ktag:'K342', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify that grease filters in kitchen hoods are in place, clean, and free of grease buildup. Confirm exhaust ductwork is cleaned at documented intervals per NFPA 96.' },
+  { ktag:'K351', section:'K300s-Protection', careLevels:['SNF','AL','MC'],
+    prompt:'Confirm that oxygen storage, if present, complies with NFPA 99 requirements for storage quantity limits, room signage, ventilation, and separation from ignition sources.' },
+  { ktag:'K352', section:'K300s-Protection', careLevels:['SNF','MC'],
+    prompt:'Inspect the medical gas system, if present, including alarm panels, zone valves, and documentation of most recent inspection and testing per NFPA 99.' },
+  { ktag:'K353', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Verify that electrical panels, junction boxes, and utility rooms are free of combustible storage and that all panels have dead fronts installed with no open knockouts.' },
+  { ktag:'K354', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Inspect laundry and dryer operations for lint trap cleanliness, duct integrity, and that dryers are not operated unattended when the building is in sleep mode overnight.' },
+  { ktag:'K361', section:'K300s-Protection', careLevels:['All'],
+    prompt:'Confirm that soiled linen and waste containers in corridors do not exceed 32 gallons per 64 square feet of corridor space and are removed at least once daily per NFPA 101 18/19.7.5.' },
+
+  /* ---- K300s: Egress ---- */
+  { ktag:'K362', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Verify that all required exit accesses, exits, and exit discharges are clear of obstructions and free of storage at all times. Confirm exits are not blocked by carts, furniture, or equipment.' },
+  { ktag:'K363', section:'K300s-Egress', careLevels:['SNF','AL','MC'],
+    prompt:'Inspect corridor width throughout the facility to confirm clear width of at least 8 feet in new construction or 6 feet in existing facilities for patient-use corridors per NFPA 101.' },
+  { ktag:'K364', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Verify that all exit doors swing in the direction of egress travel where the area served has an occupant load of 50 or more. Confirm doors swing freely without binding or warping.' },
+  { ktag:'K371', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Inspect all exit signs for illumination. Verify internally illuminated signs are lit, battery backup is functional, and externally illuminated signs have working lamps. Check for any missing or damaged signs.' },
+  { ktag:'K372', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Confirm that emergency lighting provides a minimum 1 footcandle at floor level along the egress path for at least 90 minutes. Test units for proper operation by pressing the test button.' },
+  { ktag:'K373', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Verify that exit stairways are enclosed with a minimum 1-hour fire-rated construction, that doors are self-closing and latching, and that no storage is present in the stair enclosure.' },
+  { ktag:'K374', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Confirm handrails on all stairways are graspable, continuous, mounted between 34 and 38 inches above stair nosing, and returned to the wall or newel at both ends.' },
+  { ktag:'K375', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Inspect corridor doors for proper self-closing and positive latching. Verify that doors to resident rooms, hazardous areas, and smoke barrier crossings latch and do not stand open using unapproved devices.' },
+  { ktag:'K376', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Verify that no dead-end corridors exceed 30 feet in length from the last point of choice. Confirm travel distances to the nearest exit do not exceed code limits for the occupancy type.' },
+  { ktag:'K377', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Confirm that all exit discharge paths from exit doors to the public way are identified, unobstructed, and maintained clear of ice and debris. Verify outdoor lighting is operational along discharge paths.' },
+  { ktag:'K378', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Inspect locking arrangements at all exit access doors. Verify that any delayed-egress locks meet NFPA 101 7.2.1.6 requirements including 15-second release, signage, and connection to alarm system.' },
+  { ktag:'K379', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Verify that magnetic door locks connected to the access control system are configured to release upon fire alarm activation, loss of power, and activation of a manual release at the door.' },
+  { ktag:'K381', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Confirm that all required exits are marked with approved exit signs visible from any direction of approach. Verify that No Exit signs are posted on doors that could be mistaken for exits.' },
+  { ktag:'K382', section:'K300s-Egress', careLevels:['All'],
+    prompt:'Inspect exterior exit doors for proper hardware: panic hardware or lever hardware on doors serving 50 or more occupants. Verify doors open with a single releasing motion without a key.' },
+  { ktag:'K383', section:'K300s-Egress', careLevels:['All'],
+    prompt:"Verify that the facility has current evacuation maps posted in each smoke compartment showing the floor layout, exits, fire alarm pull stations, and assembly areas. Maps must be oriented to reflect the viewer's location." },
+
+  /* ---- K700s: Building Services ---- */
+  { ktag:'K711', section:'K700s', careLevels:['All'],
+    prompt:'Verify that the emergency generator is tested under load monthly for a minimum of 30 minutes and annually for at least 4 continuous hours. Confirm test logs and maintenance records are current and on file.' },
+  { ktag:'K712', section:'K700s', careLevels:['All'],
+    prompt:'Inspect the emergency generator for adequate fuel supply (minimum 96 hours per NFPA 110), proper battery condition, coolant level, oil level, and absence of fluid leaks.' },
+  { ktag:'K713', section:'K700s', careLevels:['All'],
+    prompt:'Verify that the essential electrical system is properly categorized. Confirm transfer switch operation is tested and documented. Verify automatic transfer occurs within 10 seconds of normal power loss.' },
+  { ktag:'K721', section:'K700s', careLevels:['All'],
+    prompt:'Inspect HVAC equipment for current maintenance documentation. Verify that supply and return air filters are in place, not damaged, and changed at documented intervals. Confirm no open ductwork.' },
+  { ktag:'K722', section:'K700s', careLevels:['All'],
+    prompt:'Verify that any fuel-fired heating equipment (boilers, furnaces, unit heaters) is inspected and maintained annually by a qualified contractor. Confirm documentation is on file.' },
+  { ktag:'K731', section:'K700s', careLevels:['All'],
+    prompt:'Confirm that electrical wiring and equipment throughout the facility is maintained in a safe operating condition. Inspect for exposed wiring, improper use of extension cords, and overloaded receptacles.' },
+  { ktag:'K732', section:'K700s', careLevels:['All'],
+    prompt:'Verify that ground fault circuit interrupter (GFCI) protection is provided at all wet locations including bathrooms, kitchens, and mechanical rooms. Test GFCI receptacles for proper operation.' },
+  { ktag:'K741', section:'K700s', careLevels:['All'],
+    prompt:'Inspect elevators for current state inspection certificates posted in the cab. Verify that emergency communications in each elevator car are operational and tested.' },
+  { ktag:'K742', section:'K700s', careLevels:['All'],
+    prompt:'Confirm that elevator recall (Phase I emergency return) is operational and that all elevators return to the designated recall floor upon fire alarm activation in that zone.' },
+  { ktag:'K751', section:'K700s', careLevels:['SNF','AL','MC'],
+    prompt:'Inspect emergency call/nurse call systems in resident rooms and bathrooms (where applicable) for proper operation. Verify that staff are able to respond to calls and that the system is tested periodically.' },
+  { ktag:'K761', section:'K700s', careLevels:['All'],
+    prompt:'Verify that water heater systems provide domestic hot water at a temperature safe for resident use (120 degrees F maximum at fixtures per NFPA 101 A.5.1) and that anti-scald devices are in place.' },
+  { ktag:'K771', section:'K700s', careLevels:['All'],
+    prompt:'Confirm that utility tunnels, crawl spaces, and mechanical rooms do not contain combustible storage and that access hatches and doors are properly fire-rated where required.' },
+  { ktag:'K781', section:'K700s', careLevels:['All'],
+    prompt:'Inspect the facility roof drainage system for condition and proper function. Confirm roof access hatches are secured and labeled, and that rooftop mechanical equipment is accessible safely without creating fall hazards.' },
+  { ktag:'K791', section:'K700s', careLevels:['SNF','AL','MC'],
+    prompt:'Verify that all portable and fixed electrical equipment used in patient care areas meets NFPA 99 requirements. Confirm biomedical equipment inspection records are current and available.' },
+  { ktag:'K793', section:'K700s', careLevels:['All'],
+    prompt:'Confirm that diesel fuel storage for the emergency generator is within approved NFPA 30 quantities and that fuel storage area is constructed, ventilated, and maintained per the applicable code.' },
+
+  /* ---- K900s: Special Provisions ---- */
+  { ktag:'K900', section:'K900s', careLevels:['All'],
+    prompt:"Review the facility's written fire and evacuation plan. Verify the plan is current, addresses all scenarios (fire, external disaster, shelter-in-place), and is reviewed at least annually with department heads." },
+  { ktag:'K901', section:'K900s', careLevels:['All'],
+    prompt:'Confirm that fire drills are conducted at least quarterly on each shift. Verify drill records include the date, shift, evacuation time, staff participation, and a post-drill critique note.' },
+  { ktag:'K902', section:'K900s', careLevels:['All'],
+    prompt:'Verify that all staff receive fire safety orientation before providing direct care and annual refresher training. Confirm training records document RACE/PASS instruction and evacuation procedures.' },
+  { ktag:'K903', section:'K900s', careLevels:['All'],
+    prompt:'Confirm that the facility maintains a complete and current Life Safety drawing set (floor plans showing compartmentation, exits, sprinkler zones, and alarm zones) that is available for surveyor review on demand.' },
+  { ktag:'K904', section:'K900s', careLevels:['All'],
+    prompt:'Inspect for and confirm the absence of portable space heaters in the facility unless they are approved radiant heaters used in staff areas under a written policy in compliance with NFPA 101.' },
+  { ktag:'K905', section:'K900s', careLevels:['All'],
+    prompt:'Verify that the facility has a written smoking policy. If smoking is permitted, confirm designated areas are provided outside of the building at least 25 feet from any exit, entrance, or air intake.' },
+  { ktag:'K910', section:'K900s', careLevels:['All'],
+    prompt:'Confirm that the facility has a current written ILSM (Interim Life Safety Measures) policy. When construction or renovation is in progress, verify that ILSM is documented and actively in use.' },
+  { ktag:'K911', section:'K900s', careLevels:['SNF','AL','MC'],
+    prompt:'Inspect resident room furnishings and textiles in SNF and AL areas. Verify that upholstered furniture and mattresses meet fire-retardant requirements and that documentation is available.' },
+  { ktag:'K920', section:'K900s', careLevels:['All'],
+    prompt:"Verify that the facility's waiver file is current if any standard equivalency or waivers are in place. Confirm that the waiver documentation is on file and that conditions of approval are being met." },
+  { ktag:'K921', section:'K900s', careLevels:['All'],
+    prompt:'Confirm that any corridor decorations, bulletin boards, or artwork in the means of egress corridor do not exceed 20% of the wall area in any compartment and are of limited-combustibility materials.' },
+  { ktag:'K930', section:'K900s', careLevels:['MC'],
+    prompt:'For memory care units: verify that the CMS-approved delayed-egress waiver is in effect if wandering-prevention locks are installed, and confirm the required signage and annual testing are documented.' },
+  { ktag:'K931', section:'K900s', careLevels:['All'],
+    prompt:'Inspect any construction or renovation areas within or adjacent to occupied spaces. Confirm temporary fire barriers are in place, penetrations are protected, and fire watch is documented if required.' },
+  { ktag:'K940', section:'K900s', careLevels:['All'],
+    prompt:'Verify that the facility conducts an annual review of the Life Safety Code compliance survey against current NFPA 101 and CMS Appendix I requirements. Confirm documentation of the review and any action items is on file.' },
+  { ktag:'K941', section:'K900s', careLevels:['All'],
+    prompt:'Confirm that the facility maintains a Statement of Conditions (SOC) or equivalent compliance tracking document identifying any known deficiencies, plans for correction, and target completion dates.' },
+  { ktag:'K942', section:'K900s', careLevels:['All'],
+    prompt:'Verify that hazardous materials (cleaning chemicals, pesticides, paint) are stored in a properly separated hazardous materials storage area, labeled per NFPA 704, and inventoried annually per facility policy.' }
+];
+
+/* ============================================================
+   E-TAG ITEM POOL (CMS Emergency Preparedness Requirements)
+   Format: { ktag (used as tag id), section, prompt, careLevels }
+   ============================================================ */
+const ETAG_POOL = [
+  { ktag:'E0001', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the facility has a current, written Emergency Preparedness (EP) Plan. Confirm the plan has been reviewed and updated at least annually and that the review is documented with a date and responsible party.' },
+  { ktag:'E0004', section:'E-Tags', careLevels:['All'],
+    prompt:'Confirm that the EP plan includes a risk assessment using an all-hazards approach. Verify that identified risks are specific to the community location and resident population and that the assessment has been updated within the past year.' },
+  { ktag:'E0006', section:'E-Tags', careLevels:['All'],
+    prompt:"Verify that the facility's EP plan addresses strategies for addressing a variety of hazards including natural disasters, utility failure, and man-made emergencies relevant to the geographic area." },
+  { ktag:'E0013', section:'E-Tags', careLevels:['SNF','AL','MC'],
+    prompt:'Confirm that the EP plan includes documented policies and procedures for the provision of subsistence needs for staff and residents during an emergency, including food, water, pharmaceutical supplies, and medical equipment.' },
+  { ktag:'E0014', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the EP plan addresses the tracking of residents and staff during an emergency and upon return to normal operations. Confirm procedures are in place for notifying families and responsible parties of resident location changes.' },
+  { ktag:'E0015', section:'E-Tags', careLevels:['SNF','AL','MC'],
+    prompt:'Confirm that the EP plan includes policies and procedures for the safe evacuation of residents, including residents with special needs. Verify evacuation routes, transportation resources, and receiving facility agreements are documented.' },
+  { ktag:'E0018', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the facility has a written communication plan as part of the EP program. Confirm the plan includes primary and backup communication systems, contact information for staff and external agencies, and procedures for communicating with residents and families during an emergency.' },
+  { ktag:'E0020', section:'E-Tags', careLevels:['All'],
+    prompt:'Confirm that the communication plan includes procedures for contacting and coordinating with local, state, and federal emergency management agencies. Verify contact information is current and accessible to key staff.' },
+  { ktag:'E0022', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the EP plan identifies the roles and responsibilities of facility staff during emergency situations. Confirm that a defined chain of command exists and that staff have been trained on their specific emergency roles.' },
+  { ktag:'E0024', section:'E-Tags', careLevels:['All'],
+    prompt:"Confirm that the facility conducts and documents an annual EP training program for all staff including new hires. Verify training records show coverage of the facility's EP plan, evacuation procedures, and staff-specific emergency roles." },
+  { ktag:'E0026', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the facility conducts and documents EP exercises at least twice annually. Confirm that at least one exercise is a full-scale community-based or facility-based drill and that post-exercise critiques are documented with identified corrective actions.' },
+  { ktag:'E0030', section:'E-Tags', careLevels:['All'],
+    prompt:'Confirm that the EP plan addresses the continuity of essential building systems during an emergency including electrical, water, HVAC, and fire protection. Verify generator capacity, fuel reserves, and priority circuit mapping are documented.' },
+  { ktag:'E0033', section:'E-Tags', careLevels:['SNF','AL','MC'],
+    prompt:'Verify that the EP plan includes policies and procedures for the continuity of resident care and services during emergencies. Confirm procedures address medication management, wound care, and the needs of residents with cognitive impairments.' },
+  { ktag:'E0036', section:'E-Tags', careLevels:['All'],
+    prompt:'Confirm that the facility has documented agreements or memoranda of understanding with other healthcare facilities, hotels, or other entities that would serve as receiving facilities or sources of support during an emergency requiring evacuation or shelter-in-place.' },
+  { ktag:'E0041', section:'E-Tags', careLevels:['All'],
+    prompt:'Verify that the EP plan is integrated with the local, regional, and state emergency preparedness plans. Confirm that the facility participates in community emergency preparedness activities and that this participation is documented.' }
+];
+
+/* ============================================================
+   SECTION CONFIGURATION
+   drawCounts: { spot, standard, intensive }
+   ============================================================ */
+const SECTIONS = [
+  { key:'K200s',            label:'K200s: Construction',  isEtag:false, drawCounts:{ spot:4,  standard:7,  intensive:10 } },
+  { key:'K300s-Protection', label:'K300s: Protection',    isEtag:false, drawCounts:{ spot:5,  standard:9,  intensive:13 } },
+  { key:'K300s-Egress',     label:'K300s: Egress',        isEtag:false, drawCounts:{ spot:5,  standard:10, intensive:14 } },
+  { key:'K700s',            label:'K700s: Building Svcs', isEtag:false, drawCounts:{ spot:4,  standard:8,  intensive:11 } },
+  { key:'K900s',            label:'K900s: Special Prov',  isEtag:false, drawCounts:{ spot:3,  standard:6,  intensive:8  } },
+  { key:'E-Tags',           label:'E-Tags: EP',           isEtag:true,  drawCounts:{ spot:3,  standard:5,  intensive:7  } }
+];
+
+/* ============================================================
+   COMMUNITIES WITHOUT SNF
+   ============================================================ */
+const NO_SNF_COMMUNITIES = ['VMC', 'MV'];
+
+/* ============================================================
+   COMMUNITY FULL NAMES
+   ============================================================ */
+const COMMUNITY_NAMES = {
+  AV:'Addolorata Villa', FV:'Franciscan Village', MAV:'Mount Alverna Village',
+  MV:'Marian Village',   SJV:'St. Joseph Village', UP:'University Place',
+  VMC:'Village at Mercy Creek', VVL:'Village at Victory Lakes'
+};
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+let surveyState = {
+  community:  '',
+  careLevels: [],
+  surveyor:   '',
+  date:       '',
+  intensity:  'standard',
+  items:      [],
+  responses:  {}
+};
+
+/* ============================================================
+   SETUP SCREEN INITIALIZATION (inline, no DOMContentLoaded)
+   ============================================================ */
+function toggleCareLevel(btn) {
+  if (btn.classList.contains('disabled')) return;
+  btn.classList.toggle('selected');
+}
+
+function onCommunityChange(sel) {
+  var snfBtn = document.getElementById('btn-SNF');
+  if (NO_SNF_COMMUNITIES.indexOf(sel.value) !== -1) {
+    snfBtn.classList.add('disabled');
+    snfBtn.classList.remove('selected');
+  } else {
+    snfBtn.classList.remove('disabled');
+  }
+}
+
+function selectIntensity(btn) {
+  var btns = document.querySelectorAll('.intensity-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('selected');
+  btn.classList.add('selected');
+  surveyState.intensity = btn.dataset.intensity;
+}
+
+/* Set default date to today */
+document.getElementById('inp-date').value = new Date().toISOString().slice(0, 10);
+
+/* ============================================================
+   RANDOM DRAW BY SECTION AND INTENSITY
+   ============================================================ */
+function drawItems(careLevels, intensity) {
+  const pool = [...KTAG_POOL, ...ETAG_POOL];
+  const drawn = [];
+  SECTIONS.forEach(sec => {
+    const count = sec.drawCounts[intensity] || 0;
+    const eligible = pool.filter(item =>
+      item.section === sec.key &&
+      (item.careLevels.includes('All') || item.careLevels.some(cl => careLevels.includes(cl)))
+    );
+    const shuffled = [...eligible].sort(() => Math.random() - 0.5);
+    drawn.push(...shuffled.slice(0, count));
+  });
+  return drawn;
+}
+
+/* ============================================================
+   GENERATE SURVEY
+   ============================================================ */
+function generateSurvey() {
+  const community = document.getElementById('sel-community').value;
+  const surveyor  = document.getElementById('inp-surveyor').value.trim();
+  const date      = document.getElementById('inp-date').value;
+
+  if (!community) { alert('Please select a community.'); return; }
+  if (!surveyor)  { alert('Please enter a surveyor name.'); return; }
+  if (!date)      { alert('Please select a survey date.'); return; }
+
+  const careLevels = ['IL','AL','MC','SNF'].filter(cl => {
+    const btn = document.getElementById('btn-' + cl);
+    return btn && btn.classList.contains('selected') && !btn.classList.contains('disabled');
+  });
+  if (careLevels.length === 0) { alert('Please select at least one care level.'); return; }
+
+  surveyState.community  = community;
+  surveyState.surveyor   = surveyor;
+  surveyState.date       = date;
+  surveyState.careLevels = careLevels;
+  surveyState.items      = drawItems(careLevels, surveyState.intensity);
+  surveyState.responses  = {};
+
+  surveyState.items.forEach(item => {
+    surveyState.responses[item.ktag] = { status:'na', priority:'', notes:'' };
+  });
+
+  renderSurvey();
+  showScreen('survey-screen');
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   RE-RANDOMIZE
+   ============================================================ */
+function rerandomize() {
+  if (!confirm('Re-randomize the item set? Current ratings will be lost.')) return;
+  surveyState.items     = drawItems(surveyState.careLevels, surveyState.intensity);
+  surveyState.responses = {};
+  surveyState.items.forEach(item => {
+    surveyState.responses[item.ktag] = { status:'na', priority:'', notes:'' };
+  });
+  renderSurvey();
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   BACK TO SETUP
+   ============================================================ */
+function backToSetup() {
+  if (!confirm('Return to setup? Current ratings will be lost.')) return;
+  showScreen('setup-screen');
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   RENDER SURVEY SCREEN
+   ============================================================ */
+function renderSurvey() {
+  const intensityLabels = { spot:'Spot Check', standard:'Standard', intensive:'Intensive' };
+  const dateStr = surveyState.date
+    ? new Date(surveyState.date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+    : '';
+
+  document.getElementById('survey-meta-block').innerHTML =
+    '<strong>' + surveyState.community + '</strong> &nbsp;|&nbsp; ' +
+    escapeHtml(surveyState.surveyor) + ' &nbsp;|&nbsp; ' + dateStr +
+    ' &nbsp;|&nbsp; Levels: ' + surveyState.careLevels.join(', ') +
+    ' <span class="intensity-pip">' + (intensityLabels[surveyState.intensity] || '') + '</span>';
+
+  const tabsEl   = document.getElementById('section-tabs');
+  const panelsEl = document.getElementById('section-panels');
+  tabsEl.innerHTML   = '';
+  panelsEl.innerHTML = '';
+
+  let firstActive = true;
+  SECTIONS.forEach(sec => {
+    const secItems = surveyState.items.filter(i => i.section === sec.key);
+    if (secItems.length === 0) return;
+
+    /* Tab */
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'tab-btn' + (firstActive ? ' active' : '') + (sec.isEtag ? ' etag-tab' : '');
+    tab.dataset.section = sec.key;
+    tab.setAttribute('onclick', 'switchTab("' + sec.key + '")');
+
+    const failCount = secItems.filter(i => surveyState.responses[i.ktag].status === 'fail').length;
+    const badge = document.createElement('span');
+    badge.className = 'tab-badge ' + (failCount > 0 ? 'fail-badge' : 'default-badge');
+    badge.textContent = failCount > 0 ? failCount : secItems.length;
+    badge.id = 'tab-badge-' + sec.key;
+
+    tab.appendChild(document.createTextNode(sec.label + ' '));
+    tab.appendChild(badge);
+    tabsEl.appendChild(tab);
+
+    /* Panel */
+    const panel = document.createElement('div');
+    panel.className = 'section-panel' + (firstActive ? ' active' : '');
+    panel.id = 'panel-' + sec.key;
+
+    const heading = document.createElement('div');
+    heading.className = 'section-heading' + (sec.isEtag ? ' etag-heading' : '');
+    heading.textContent = sec.label + ' -- ' + secItems.length + ' items';
+    panel.appendChild(heading);
+
+    secItems.forEach(item => panel.appendChild(buildItemCard(item, sec.isEtag)));
+    panelsEl.appendChild(panel);
+    firstActive = false;
+  });
+
+  updateProgress();
+}
+
+/* ============================================================
+   BUILD A SINGLE ITEM CARD
+   ============================================================ */
+function buildItemCard(item, isEtag) {
+  const resp = surveyState.responses[item.ktag];
+  const card = document.createElement('div');
+  card.className = 'item-card' + (isEtag ? ' etag-card' : '') + ' status-' + resp.status;
+  card.id = 'card-' + item.ktag;
+
+  /* Header row */
+  const hdr = document.createElement('div');
+  hdr.className = 'item-header';
+
+  const tnum = document.createElement('span');
+  tnum.className = 'tag-num' + (isEtag ? ' etag-num' : '');
+  tnum.textContent = item.ktag;
+
+  const cflag = document.createElement('span');
+  cflag.className = 'care-flag';
+  cflag.textContent = item.careLevels.includes('All') ? 'All Levels' : item.careLevels.join('/');
+
+  hdr.appendChild(tnum);
+  hdr.appendChild(cflag);
+  card.appendChild(hdr);
+
+  /* Prompt */
+  const prompt = document.createElement('div');
+  prompt.className = 'item-prompt';
+  prompt.textContent = item.prompt;
+  card.appendChild(prompt);
+
+  /* Pass / Fail / N/A toggles */
+  const tg = document.createElement('div');
+  tg.className = 'toggle-group';
+
+  [
+    { val:'pass', label:'Pass', selClass:'sel-pass' },
+    { val:'fail', label:'Fail', selClass:'sel-fail' },
+    { val:'na',   label:'N/A',  selClass:'sel-na'   }
+  ].forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toggle-btn' + (resp.status === s.val ? ' ' + s.selClass : '');
+    btn.textContent = s.label;
+    btn.setAttribute('onclick', 'setStatus("' + item.ktag + '","' + s.val + '","' + s.selClass + '")');
+    tg.appendChild(btn);
+  });
+  card.appendChild(tg);
+
+  /* Fail details */
+  const fd = document.createElement('div');
+  fd.className = 'fail-details' + (resp.status === 'fail' ? ' visible' : '');
+  fd.id = 'fail-' + item.ktag;
+
+  const pLbl = document.createElement('div');
+  pLbl.className = 'priority-label';
+  pLbl.textContent = 'Correction Priority';
+  fd.appendChild(pLbl);
+
+  const pg = document.createElement('div');
+  pg.className = 'priority-group';
+  [
+    { val:'Immediate', label:'Immediate', selClass:'sel-immed' },
+    { val:'30-Day',    label:'30-Day',    selClass:'sel-30'    },
+    { val:'90-Day',    label:'90-Day',    selClass:'sel-90'    }
+  ].forEach(p => {
+    const pb = document.createElement('button');
+    pb.type = 'button';
+    pb.className = 'priority-btn' + (resp.priority === p.val ? ' ' + p.selClass : '');
+    pb.textContent = p.label;
+    pb.setAttribute('onclick', 'setPriority("' + item.ktag + '","' + p.val + '","' + p.selClass + '")');
+    pg.appendChild(pb);
+  });
+  fd.appendChild(pg);
+
+  const nLbl = document.createElement('div');
+  nLbl.className = 'notes-label';
+  nLbl.textContent = 'Finding / Observation Notes';
+  fd.appendChild(nLbl);
+
+  const notes = document.createElement('textarea');
+  notes.className = 'notes-field';
+  notes.id = 'notes-' + item.ktag;
+  notes.placeholder = 'Describe the condition observed, location, and any immediate actions taken...';
+  notes.value = resp.notes || '';
+  notes.setAttribute('oninput', 'surveyState.responses["' + item.ktag + '"].notes = this.value');
+  fd.appendChild(notes);
+  card.appendChild(fd);
+
+  return card;
+}
+
+/* ============================================================
+   SET ITEM STATUS
+   ============================================================ */
+function setStatus(ktag, status, selClass) {
+  surveyState.responses[ktag].status = status;
+  if (status !== 'fail') surveyState.responses[ktag].priority = '';
+
+  const card = document.getElementById('card-' + ktag);
+  const isEtag = surveyState.items.find(i => i.ktag === ktag)?.section === 'E-Tags';
+  card.className = 'item-card' + (isEtag ? ' etag-card' : '') + ' status-' + status;
+
+  card.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.className = btn.className.replace(/\s?sel-\w+/g, '');
+    if (btn.textContent === 'Pass' && status === 'pass') btn.classList.add('sel-pass');
+    if (btn.textContent === 'Fail' && status === 'fail') btn.classList.add('sel-fail');
+    if (btn.textContent === 'N/A'  && status === 'na')   btn.classList.add('sel-na');
+  });
+
+  const fd = document.getElementById('fail-' + ktag);
+  if (fd) fd.classList.toggle('visible', status === 'fail');
+
+  updateProgress();
+  const sec = surveyState.items.find(i => i.ktag === ktag)?.section;
+  if (sec) updateTabBadge(sec);
+}
+
+/* ============================================================
+   SET PRIORITY
+   ============================================================ */
+function setPriority(ktag, value, selClass) {
+  surveyState.responses[ktag].priority = value;
+  const card = document.getElementById('card-' + ktag);
+  card.querySelectorAll('.priority-btn').forEach(btn => {
+    btn.className = btn.className.replace(/\s?sel-\w+/g, '');
+  });
+  const labelMap = { 'Immediate':'Immediate', '30-Day':'30-Day', '90-Day':'90-Day' };
+  card.querySelectorAll('.priority-btn').forEach(btn => {
+    if (btn.textContent === labelMap[value]) btn.classList.add(selClass);
+  });
+}
+
+/* ============================================================
+   SWITCH TAB
+   ============================================================ */
+function switchTab(sectionKey) {
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.section === sectionKey));
+  document.querySelectorAll('.section-panel').forEach(p =>
+    p.classList.toggle('active', p.id === 'panel-' + sectionKey));
+}
+
+/* ============================================================
+   UPDATE TAB BADGE
+   ============================================================ */
+function updateTabBadge(sectionKey) {
+  const secItems  = surveyState.items.filter(i => i.section === sectionKey);
+  const failCount = secItems.filter(i => surveyState.responses[i.ktag].status === 'fail').length;
+  const badge = document.getElementById('tab-badge-' + sectionKey);
+  if (!badge) return;
+  badge.className = 'tab-badge ' + (failCount > 0 ? 'fail-badge' : 'default-badge');
+  badge.textContent = failCount > 0 ? failCount : secItems.length;
+}
+
+/* ============================================================
+   UPDATE PROGRESS BAR
+   ============================================================ */
+function updateProgress() {
+  const total  = surveyState.items.length;
+  const resps  = Object.values(surveyState.responses);
+  const passN  = resps.filter(r => r.status === 'pass').length;
+  const failN  = resps.filter(r => r.status === 'fail').length;
+  const naN    = resps.filter(r => r.status === 'na').length;
+  const rated  = passN + failN;
+  const pct    = total > 0 ? Math.round((rated / total) * 100) : 0;
+
+  document.getElementById('progress-fill').style.width    = pct + '%';
+  document.getElementById('progress-count').textContent   = rated + ' of ' + total + ' items rated';
+  document.getElementById('stat-pass').textContent = 'Pass: ' + passN;
+  document.getElementById('stat-fail').textContent = 'Fail: ' + failN;
+  document.getElementById('stat-na').textContent   = 'N/A: '  + naN;
+}
+
+/* ============================================================
+   GENERATE PRINT REPORT
+   ============================================================ */
+function generateReport() {
+  const resps     = surveyState.responses;
+  const allItems  = surveyState.items;
+  const failItems = allItems.filter(i => resps[i.ktag].status === 'fail');
+  const passN     = allItems.filter(i => resps[i.ktag].status === 'pass').length;
+  const failN     = failItems.length;
+  const naN       = allItems.filter(i => resps[i.ktag].status === 'na').length;
+  const total     = allItems.length;
+  const failRate  = (passN + failN) > 0 ? ((failN / (passN + failN)) * 100).toFixed(1) : '0.0';
+
+  const communityFull = COMMUNITY_NAMES[surveyState.community] || surveyState.community;
+  const dateStr = surveyState.date
+    ? new Date(surveyState.date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+    : '';
+  const intensityLabels = { spot:'Spot Check', standard:'Standard', intensive:'Intensive' };
+
+  let html = '';
+  let pageNum = 1;
+
+  function pageHeader(n) {
+    return '<div class="print-header">' +
+      '<div><div class="print-org">Franciscan Ministries | Plant Operations</div>' +
+      '<div class="print-dept">Mock Life Safety Code Survey</div></div>' +
+      '<div class="print-page-num">Page ' + n + '</div></div>';
+  }
+
+  /* Cover page */
+  html += '<div class="print-page">' + pageHeader(pageNum++) +
+    '<div class="cover-body">' +
+    '<div class="cover-title">Mock Life Safety Code Survey</div>' +
+    '<div class="cover-subtitle">Internal Preparedness Assessment</div>' +
+    '<table class="cover-meta-table"><tbody>' +
+    '<tr><td class="meta-lbl">Community</td><td class="meta-val">' + communityFull + ' (' + surveyState.community + ')</td></tr>' +
+    '<tr><td class="meta-lbl">Survey Date</td><td class="meta-val">' + dateStr + '</td></tr>' +
+    '<tr><td class="meta-lbl">Surveyor</td><td class="meta-val">' + escapeHtml(surveyState.surveyor) + '</td></tr>' +
+    '<tr><td class="meta-lbl">Care Levels Surveyed</td><td class="meta-val">' + surveyState.careLevels.join(', ') + '</td></tr>' +
+    '<tr><td class="meta-lbl">Survey Intensity</td><td class="meta-val">' + (intensityLabels[surveyState.intensity] || '') + '</td></tr>' +
+    '<tr><td class="meta-lbl">Total Items Surveyed</td><td class="meta-val">' + total + '</td></tr>' +
+    '<tr><td class="meta-lbl">Deficiencies Identified</td><td class="meta-val">' + failN + '</td></tr>' +
+    '</tbody></table>' +
+    '<div class="cover-disclaimer">This is an internal mock survey conducted for preparedness purposes only. ' +
+    'It does not constitute a formal CMS or state survey. Findings should be used to guide corrective action ' +
+    'planning and Life Safety Code compliance improvement efforts. Not for external distribution.</div>' +
+    '</div></div>';
+
+  /* All items listing (grouped by section, every item shown) */
+  html += '<div class="print-page">' + pageHeader(pageNum++);
+  html += '<div style="font-size:13pt;font-weight:700;color:#1B3A6B;margin-bottom:12pt;">Inspection Results — All Items</div>';
+  SECTIONS.forEach(sec => {
+    const secItems = allItems.filter(i => i.section === sec.key);
+    if (secItems.length === 0) return;
+    html += '<div class="print-section-heading' + (sec.isEtag ? ' etag-heading' : '') + '">' + sec.label + '</div>';
+    secItems.forEach(item => {
+      const r = resps[item.ktag];
+      const statusLabel = r.status === 'pass' ? 'PASS' : r.status === 'fail' ? 'FAIL' : 'N/A';
+      const statusClass = r.status === 'pass' ? 'st-pass' : r.status === 'fail' ? 'st-fail' : 'st-na';
+      const itemClass   = r.status === 'pass' ? 'item-pass' : r.status === 'fail' ? 'item-fail' : 'item-na';
+      html += '<div class="print-item ' + itemClass + '">' +
+        '<div class="print-item-header">' +
+        '<span class="print-ktag' + (sec.isEtag ? ' etag' : '') + '">' + item.ktag + '</span>' +
+        '<span class="print-status ' + statusClass + '">' + statusLabel + '</span>';
+      if (r.status === 'fail' && r.priority) {
+        const pClass = r.priority === 'Immediate' ? 'immed' : r.priority === '30-Day' ? 'd30' : 'd90';
+        html += '<span class="print-priority ' + pClass + '" style="margin-left:4pt;">' + r.priority + '</span>';
+      }
+      html += '</div>' +
+        '<div class="print-prompt">' + escapeHtml(item.prompt) + '</div>';
+      if (r.status === 'fail') {
+        html += '<div class="print-notes-label">Surveyor Observation</div>';
+        html += (r.notes && r.notes.trim())
+          ? '<div class="print-notes">' + escapeHtml(r.notes) + '</div>'
+          : '<div class="print-notes-empty">No observation notes recorded.</div>';
+      }
+      html += '</div>';
+    });
+  });
+  html += '</div>';
+
+  /* Scorecard */
+  html += '<div class="print-page">' + pageHeader(pageNum++);
+  html += '<div class="scorecard-title">Survey Scorecard</div>';
+  html += '<div class="scorecard-grid">' +
+    box(total, 'Items Surveyed', false) + box(passN, 'Pass', false) +
+    box(failN, 'Fail', true) + box(naN, 'N/A', false) +
+    box(failRate + '%', 'Fail Rate', parseFloat(failRate) > 20) +
+    '</div>';
+
+  html += '<table class="section-scorecard"><thead><tr>' +
+    '<th>Section</th><th>Items</th><th>Pass</th><th>Fail</th><th>N/A</th><th>Fail Rate</th>' +
+    '</tr></thead><tbody>';
+  SECTIONS.forEach(sec => {
+    const si = allItems.filter(i => i.section === sec.key);
+    if (si.length === 0) return;
+    const sp = si.filter(i => resps[i.ktag].status === 'pass').length;
+    const sf = si.filter(i => resps[i.ktag].status === 'fail').length;
+    const sn = si.filter(i => resps[i.ktag].status === 'na').length;
+    const sr = (sp + sf) > 0 ? ((sf / (sp + sf)) * 100).toFixed(1) : '-';
+    const hi = sr !== '-' && parseFloat(sr) > 20;
+    html += '<tr><td>' + sec.label + '</td><td>' + si.length + '</td><td>' + sp + '</td><td>' + sf + '</td><td>' + sn + '</td>' +
+      '<td class="' + (hi ? 'fail-rate-high' : '') + '">' + sr + (sr !== '-' ? '%' : '') + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
+
+  /* Signature block */
+  html += '<div class="print-page">' + pageHeader(pageNum++);
+  html += '<div class="sig-title">Executive Director Acknowledgment</div>';
+  html += '<p style="font-size:9.5pt;color:#444;margin-bottom:20pt;line-height:1.6;">' +
+    'I acknowledge receipt of this mock Life Safety Code survey report for ' + communityFull + '. ' +
+    'I understand that findings identified in this report are for internal preparedness purposes and that ' +
+    'corrective action planning will be initiated for any deficiencies noted.</p>';
+  ['Signature', 'Printed Name', 'Date', 'Title'].forEach(lbl => {
+    html += '<div class="sig-block"><div class="sig-line"></div><div class="sig-sublabel">' + lbl + '</div></div>';
+  });
+  html += '</div>';
+
+  document.getElementById('report-print').innerHTML = html;
+  window.print();
+}
+
+/* ============================================================
+   HELPER: SCORECARD BOX
+   ============================================================ */
+function box(val, lbl, fail) {
+  return '<div class="scorecard-box">' +
+    '<div class="scorecard-num' + (fail ? ' fail-num' : '') + '">' + val + '</div>' +
+    '<div class="scorecard-lbl">' + lbl + '</div></div>';
+}
+
+/* ============================================================
+   UTILITY: ESCAPE HTML
+   ============================================================ */
+function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ============================================================
+   SCREEN SWITCHER
+   ============================================================ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
