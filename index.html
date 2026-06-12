@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>FM Mock Life Safety Survey | Plant Operations</title>
 <style>
 /* ============================================================
@@ -180,8 +182,9 @@ body {
 /* Care level buttons */
 .care-level-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+  justify-content: center;
 }
 .care-btn {
   display: flex;
@@ -653,6 +656,7 @@ body {
   .print-notes-label { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #555; margin-bottom: 2pt; }
   .print-notes { font-size: 9pt; color: #333; border-left: 2.5px solid #C9A84C; padding-left: 7pt; font-style: italic; line-height: 1.5; }
   .print-notes-empty { font-size: 8.5pt; color: #999; font-style: italic; }
+  .print-care-flag { font-size: 7pt; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid #CCC; padding: 1pt 5pt; margin-left: 4pt; }
 
   .scorecard-title { font-size: 13pt; font-weight: 700; color: #1B3A6B; margin-bottom: 14pt; }
   .scorecard-grid { display: flex; gap: 12pt; margin-bottom: 18pt; flex-wrap: wrap; }
@@ -688,7 +692,7 @@ body {
       <div class="header-org">Franciscan Ministries | Plant Operations</div>
       <div class="header-dept">Mock Life Safety Survey</div>
     </div>
-    <div class="header-badge">v1.2</div>
+    <div class="header-badge">v1.3</div>
   </div>
 </header>
 
@@ -720,7 +724,6 @@ body {
     <div class="form-group">
       <label class="form-label">Care Levels Present</label>
       <div class="care-level-grid">
-        <button type="button" class="care-btn" id="btn-IL"  data-level="IL"  onclick="toggleCareLevel(this)">IL</button>
         <button type="button" class="care-btn" id="btn-AL"  data-level="AL"  onclick="toggleCareLevel(this)">AL</button>
         <button type="button" class="care-btn" id="btn-MC"  data-level="MC"  onclick="toggleCareLevel(this)">MC</button>
         <button type="button" class="care-btn" id="btn-SNF" data-level="SNF" onclick="toggleCareLevel(this)">SNF</button>
@@ -1075,6 +1078,7 @@ function selectIntensity(btn) {
 
 /* Set default date to today */
 document.getElementById('inp-date').value = new Date().toISOString().slice(0, 10);
+checkDraft();
 
 /* ============================================================
    RANDOM DRAW BY SECTION AND INTENSITY
@@ -1106,7 +1110,7 @@ function generateSurvey() {
   if (!surveyor)  { alert('Please enter a surveyor name.'); return; }
   if (!date)      { alert('Please select a survey date.'); return; }
 
-  const careLevels = ['IL','AL','MC','SNF'].filter(cl => {
+  const careLevels = ['AL','MC','SNF'].filter(cl => {
     const btn = document.getElementById('btn-' + cl);
     return btn && btn.classList.contains('selected') && !btn.classList.contains('disabled');
   });
@@ -1296,7 +1300,7 @@ function buildItemCard(item, isEtag) {
   notes.id = 'notes-' + item.ktag;
   notes.placeholder = 'Describe the condition observed, location, and any immediate actions taken...';
   notes.value = resp.notes || '';
-  notes.setAttribute('oninput', 'surveyState.responses["' + item.ktag + '"].notes = this.value');
+  notes.setAttribute('oninput', 'surveyState.responses["' + item.ktag + '"].notes = this.value; saveDraft();');
   fd.appendChild(notes);
   card.appendChild(fd);
 
@@ -1327,6 +1331,7 @@ function setStatus(ktag, status, selClass) {
   updateProgress();
   const sec = surveyState.items.find(i => i.ktag === ktag)?.section;
   if (sec) updateTabBadge(sec);
+  saveDraft();
 }
 
 /* ============================================================
@@ -1342,6 +1347,7 @@ function setPriority(ktag, value, selClass) {
   card.querySelectorAll('.priority-btn').forEach(btn => {
     if (btn.textContent === labelMap[value]) btn.classList.add(selClass);
   });
+  saveDraft();
 }
 
 /* ============================================================
@@ -1448,7 +1454,8 @@ function generateReport() {
       html += '<div class="print-item ' + itemClass + '">' +
         '<div class="print-item-header">' +
         '<span class="print-ktag' + (sec.isEtag ? ' etag' : '') + '">' + item.ktag + '</span>' +
-        '<span class="print-status ' + statusClass + '">' + statusLabel + '</span>';
+        '<span class="print-status ' + statusClass + '">' + statusLabel + '</span>' +
+        '<span class="print-care-flag">' + (item.careLevels.includes('All') ? 'All Levels' : item.careLevels.join('/')) + '</span>';
       if (r.status === 'fail' && r.priority) {
         const pClass = r.priority === 'Immediate' ? 'immed' : r.priority === '30-Day' ? 'd30' : 'd90';
         html += '<span class="print-priority ' + pClass + '" style="margin-left:4pt;">' + r.priority + '</span>';
@@ -1504,6 +1511,7 @@ function generateReport() {
   html += '</div>';
 
   document.getElementById('report-print').innerHTML = html;
+  try { localStorage.removeItem('fm_lsc_survey_draft'); } catch(e) {}
   window.print();
 }
 
@@ -1523,6 +1531,44 @@ function escapeHtml(str) {
   return (str || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ============================================================
+   DRAFT AUTO-SAVE
+   ============================================================ */
+function saveDraft() {
+  try { localStorage.setItem('fm_lsc_survey_draft', JSON.stringify(surveyState)); } catch(e) {}
+}
+
+function checkDraft() {
+  var raw;
+  try { raw = localStorage.getItem('fm_lsc_survey_draft'); } catch(e) { return; }
+  if (!raw) return;
+  var banner = document.createElement('div');
+  banner.id = 'draft-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:999;background:#FFF3CD;border-bottom:2px solid #C9A84C;padding:11px 20px;display:flex;align-items:center;gap:12px;font-family:var(--font);font-size:0.87rem;color:#7B4F00;';
+  banner.innerHTML = '<span style="flex:1;font-weight:600;">A saved draft was found. Resume where you left off?</span>' +
+    '<button type="button" onclick="resumeDraft()" style="padding:7px 14px;background:#1B3A6B;color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:0.82rem;">Resume</button>' +
+    '<button type="button" onclick="discardDraft()" style="padding:7px 14px;background:transparent;color:#7B4F00;border:1.5px solid #C9A84C;border-radius:6px;font-weight:700;cursor:pointer;font-size:0.82rem;">Discard</button>';
+  document.body.insertBefore(banner, document.body.firstChild);
+}
+
+function resumeDraft() {
+  var raw;
+  try { raw = localStorage.getItem('fm_lsc_survey_draft'); } catch(e) { return; }
+  if (!raw) return;
+  try { surveyState = JSON.parse(raw); } catch(e) { return; }
+  var banner = document.getElementById('draft-banner');
+  if (banner) banner.remove();
+  renderSurvey();
+  showScreen('survey-screen');
+  window.scrollTo(0, 0);
+}
+
+function discardDraft() {
+  try { localStorage.removeItem('fm_lsc_survey_draft'); } catch(e) {}
+  var banner = document.getElementById('draft-banner');
+  if (banner) banner.remove();
 }
 
 /* ============================================================
